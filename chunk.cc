@@ -165,7 +165,7 @@ void create_file_from_chunks( const std::vector<std::string>& paths, const std::
  * @return - Just returns 0 since this used to be main and I was too lazy
  * to refactor it
  */
-int test_chunks( const std::string& file_path, const int chunks ) {
+int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	std::vector<std::string> paths = create_file_chunks( chunks, file_path );
     auto end = std::chrono::high_resolution_clock::now();
@@ -185,8 +185,8 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  */
 int main( int argc, char* argv[] ) {
     std::string path = argv[1];
-    // Adjust file path and number of chunks
-	test_chunks( path, 4 );
+    const unsigned int chunks = static_cast<unsigned int>( *argv[2] );
+	test_chunks( path, chunks );
     return 0;
 }
 
