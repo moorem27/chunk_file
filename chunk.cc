@@ -13,26 +13,43 @@ namespace {
 	char buffer[ max_buffer_size ];
 }
 
-
+/**
+ * Returns the extension of file_path
+ * /path/to/file.txt returns .txt
+ * @param file_path - The file path to the file
+ * @return The extension with the period prepended to the front
+ */
 std::string get_extension( const std::string& file_path ) {
 	size_t last_index = file_path.find_last_of( "." );
 	std::string extension = file_path.substr( last_index, file_path.length() );
 	return extension;
 }
 
-
+/**
+ * Removes the file extension from a file name
+ * /path/to/file.txt becomes /path/to/file
+ * @param file_path - The file path to the file
+ * @return The file path with the extension removed
+ */
 std::string remove_extension( const std::string& file_path ) {
 	size_t dot = file_path.find_last_of( "." );
 	if ( dot == std::string::npos ) return file_path;
 	return file_path.substr( 0, dot );
 }
 
-
+/**
+ * Create a new file name to be assigned to a file cloned from another file
+ * @param file_path - The path to the original file
+ * @return - A string representing a newly created file
+ */
 std::string clone_name( const std::string& file_path ) {
 	return remove_extension( file_path ) + "_clone" + get_extension( file_path );
 }
 
-
+/**
+ * Iterate over a vector of strings that contain file paths and remove all files
+ * @param paths - A vector of strings representing file paths
+ */
 void erase_chunks( const std::vector<std::string>& paths ) {
     for( const auto& path : paths ) {
         std::remove( path.c_str() );
@@ -40,7 +57,13 @@ void erase_chunks( const std::vector<std::string>& paths ) {
 }
 
 
-// TODO Refactor this monstrosity some day
+// TODO Refactor this monstrosity some day (it needs a lot of work...or does it?)
+/**
+ * This function splits a file into separate chunks
+ * @param chunks - The number of chunks to split the file specified by file_path
+ * @param file_path - The file path to the file
+ * @return A vector of strings containing the file paths to the newly created chunks
+ */
 std::vector<std::string> create_file_chunks( const int chunks, const std::string& file_path ) {
     if( !file_path.empty() && chunks > 0 ) {
         std::ifstream file;
@@ -130,7 +153,11 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
     }
 }
 
-
+/**
+ * Assembles a complete file from chunks of files
+ * @param paths - The paths to the file chunks
+ * @param out_path - The path where the assembled file will be created
+ */
 void create_file_from_chunks( const std::vector<std::string> &paths, const std::string& out_path ) {
 	std::ofstream output( out_path, std::ios_base::binary | std::ios::out );
 
@@ -138,9 +165,16 @@ void create_file_from_chunks( const std::vector<std::string> &paths, const std::
 		std::ifstream file( path, std::ios_base::binary );
 		output << file.rdbuf();
 	}
+    output.close();
 }
 
-
+/**
+ * A function to test all of the above code
+ * @param file_path - The path to the file that will be split
+ * @param chunks - The number of chunks to split the file into
+ * @return - Just returns 0 since this used to be main and I was too lazy
+ * to refactor it
+ */
 int test_chunks( const std::string& file_path, const int chunks ) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	std::vector<std::string> paths = create_file_chunks( chunks, file_path );
@@ -156,7 +190,10 @@ int test_chunks( const std::string& file_path, const int chunks ) {
 	return 0;
 }
 
-
+/**
+ * Good ol' fashioned main
+ * @return 0
+ */
 int main( void ) {
     // Adjust file path and number of chunks
 	test_chunks( "/Users/matthewmoore/Desktop/network.pdf" , 4 );
