@@ -64,11 +64,11 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
         // Calculate chunk size
         long long int chunk_size = size / chunks;
 
-        // Last = the last amount of bytes read
+        // The last amount of bytes read
         long long int last = 0;
 
-        // Next = how many bytes will be read
-        long long int next = max_buffer_size;
+        // Next byte position if a read were to occur
+        long long int next_byte_position = max_buffer_size;
 
         std::cout << "Number of chunks: " << chunks << std::endl;
         std::cout << "Individual chunk size: " << chunk_size << std::endl;
@@ -94,13 +94,14 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
             if ( out_file.is_open() && file.good() ) {
                 out_file.seekp( 0, std::ios_base::beg );
 
-                // Ensure that calling read won't put us past the current chunk length by checking next vs current_end
-                while ( next < current_end && last < current_end ) {
+                // Ensure that calling read won't put us past the current chunk length by checking
+                // next_byte_position vs current_end
+                while ( next_byte_position < current_end && last < current_end ) {
                     file.read( buffer, max_buffer_size );
                     out_file.write( buffer, sizeof( buffer ) );
                     memset( &buffer, 0, sizeof( buffer ) );
                     last = file.tellg();
-                    next += max_buffer_size;
+                    next_byte_position += max_buffer_size;
                 }
                 memset( &buffer, 0, sizeof( buffer ) );
 
@@ -115,13 +116,11 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
                     }
                 }
 
-                // Increment next by max_buffer_size for the next iteration
-                next += max_buffer_size;
+                // Increment next_byte_position by max_buffer_size for the next_byte_position iteration
+                next_byte_position += max_buffer_size;
             }
             out_file.close();
-            std::cout << '\r' << "Bytes chunked: " << last << std::flush;
         }
-        std::cout << '\n' << std::endl;
 
         if (last == size) std::cout << "Chunked all bytes successfully!" << std::endl;
 
@@ -159,7 +158,8 @@ int test_chunks( const std::string& file_path, const int chunks ) {
 
 
 int main( void ) {
-	test_chunks( "/Users/matthewmoore/Desktop/silicon_valley.mov", 4 );
+    // Adjust file path and number of chunks
+	test_chunks( "/Users/matthewmoore/Desktop/network.pdf" , 4 );
     return 0;
 }
 
