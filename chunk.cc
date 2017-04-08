@@ -131,7 +131,6 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
                 next_byte_position += max_buffer_size;
             }
             fclose( outfile );
-            auto end = std::chrono::high_resolution_clock::now();
         }
         return paths;
     } else {
@@ -169,6 +168,7 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	std::vector<std::string> paths = create_file_chunks( chunks, file_path );
     auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << '\n';
     std::cout << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << '\n';
 	std::string new_name = clone_name( file_path );
     create_file_from_chunks( paths, new_name );
@@ -185,7 +185,7 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
  */
 int main( int argc, char* argv[] ) {
     std::string path = argv[1];
-    const unsigned int chunks = static_cast<unsigned int>( *argv[2] );
+    const unsigned int chunks = static_cast<unsigned int>( atoi( argv[2] ) );
 	test_chunks( path, chunks );
     return 0;
 }
