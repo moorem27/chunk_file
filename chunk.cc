@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 
 // TODO Move all helper functions into a library file
@@ -196,7 +197,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  */
 int main( void ) {
     // Adjust file path and number of chunks
-	test_chunks( "/Users/matthewmoore/Desktop/network.pdf" , 4 );
+	test_chunks( "/home/matt/Desktop/arma.mp4" , 4 );
     return 0;
 }
 
