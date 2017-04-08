@@ -70,19 +70,27 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
         std::string extension = get_extension( file_path );
         std::string file_name = remove_extension( file_path );
 
-        // Open target file as binary file
+        // Open the file to be read as a binary file
         file.open( file_path, std::ios_base::binary );
 
-        // Move position counter to end of file to grab size
+        // Seek to position counter to end to grab size
         file.seekg( 0, std::ifstream::end );
 
         // Grab total file size
         long long int file_size = file.tellg();
         std::cout << "Total file size: " << file_size << " bytes" << std::endl;
 
-        long long int chunk_size = file_size / num_chunks; // Calculate chunk size
-        long long int last_bytes_read = 0; // The last amount of bytes read
-        long long int next_byte_position = max_buffer_size; // Next byte position if a read were to occur
+        // Seek back to beginning;
+        file.seekg( 0, std::ifstream::beg );
+
+        // Calculate chunk size
+        long long int chunk_size = file_size / num_chunks;
+
+        // The last amount of bytes read
+        long long int last_bytes_read = 0;
+
+        // Next byte position if a read were to occur
+        long long int next_byte_position = max_buffer_size;
 
         std::cout << "Number of chunks: " << num_chunks << std::endl;
         std::cout << "Individual chunk size: " << chunk_size << " bytes" << std::endl;
@@ -134,8 +142,8 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             }
             out_file.close();
         }
-        // The last byte read should equal the total file size if everything went well
-        if ( last_bytes_read == file_size ) std::cout << "Chunked all bytes successfully!" << std::endl;
+
+        if (last_bytes_read == file_size) std::cout << "Chunked all bytes successfully!" << std::endl;
 
         return paths;
     } else {
@@ -171,7 +179,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
 	std::string new_name = clone_name( file_path );
     create_file_from_chunks( paths, new_name );
 
-    // Uncomment to erase chunks
+    // Comment this in to erase chunks
     // erase_chunks( paths );
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -186,7 +194,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  */
 int main( void ) {
     // Adjust file path and number of chunks
-	test_chunks( "/home/matt/Desktop/arma.mp4" , 4 );
+	test_chunks( "/home/matt/Desktop/network.pdf" , 4 );
     return 0;
 }
 
