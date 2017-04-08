@@ -9,9 +9,10 @@ To compile and run this program:
 'cd build'  
 'cmake ..'  
 'make'  
-'./chunk /path/to/file 4'  
+'./chunk /path/to/file num_chunks'  
 
 where /path/to/file is the full file path to the file
-you would like to split, and 4 is the number of chunks you would like to create 
-(or a non negative number)
+you would like to split, and num_chunks is the number 
+( > 0 ) of chunks you would like to create 
+
 

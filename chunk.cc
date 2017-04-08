@@ -71,7 +71,8 @@ void erase_chunks( const std::vector<std::string>& paths ) {
 
 
 /**
- * This function splits a file into separate chunks
+ * This function splits a file into separate chunks. The file chunks are stored in the
+ * same directory as the original file.
  * @param num_chunks - The number of chunks to split the file specified by file_path
  * @param file_path - The file path to the file
  * @return A vector of strings containing the file paths to the newly created chunks
@@ -86,7 +87,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
         // Open the file to be read as a binary file
         file.open( file_path, std::ios_base::binary );
 
-        // Seek to position counter to end to grab size
+        // Seek position counter to end to grab size
         file.seekg( 0, std::ifstream::end );
 
         // Grab total file size
@@ -108,7 +109,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             // Calculate the ending byte of the current chunk
             long long int current_chunk_last_byte = ( ( i * file_size ) / num_chunks );
 
-            // Create chunk file name and push to the vector of chunk names
+            // Create chunk file name
             std::ostringstream out_file_path;
             out_file_path << file_name << i << extension;
             std::string out_file_name( out_file_path.str() );
@@ -116,6 +117,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             FILE* outfile = nullptr;
             outfile = fopen( out_file_name.c_str(), "wb" );
             if ( outfile && file.good() ) {
+                // Output file creation successful, so store name in vector
                 paths.push_back( out_file_name );
                 // Ensure that calling read won't put us past the current chunk length by checking
                 // next_byte_position vs last_chunk_byte
@@ -151,7 +153,8 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
 }
 
 /**
- * Assembles a complete file from chunks of files
+ * Assembles a complete file from chunks of files. The cloned file is stored in the same directory as the
+ * file chunks.
  * @param paths - The paths to the file chunks
  * @param out_path - The path where the assembled file will be created
  */
@@ -184,8 +187,8 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
         auto begin = std::chrono::high_resolution_clock::now();
         std::vector<std::string> paths = create_file_chunks( chunks, file_path );
         auto end = std::chrono::high_resolution_clock::now();
-        std::cout << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << '\n';
-        std::cout << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << '\n';
+        std::cout << "File chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << '\n';
+        std::cout << "                    " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << '\n';
 
         std::string new_name = clone_name( file_path );
         if( !paths.empty() )
