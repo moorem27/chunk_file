@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
-
+#include <stdio.h>
 
 // TODO Do more error checking all around
 namespace {
@@ -78,23 +78,15 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
 
         // Grab total file size
         long long int file_size = file.tellg();
-        std::cout << "Total file size: " << file_size << " bytes" << std::endl;
 
         // Seek back to beginning;
         file.seekg( 0, std::ifstream::beg );
-
-        // Calculate chunk size
-        long long int chunk_size = file_size / num_chunks;
 
         // The last amount of bytes read
         long long int last_bytes_read = 0;
 
         // Next byte position if a read were to occur
         long long int next_byte_position = max_buffer_size;
-
-        std::cout << "Number of chunks: " << num_chunks << std::endl;
-        std::cout << "Individual chunk size: " << chunk_size << " bytes" << std::endl;
-        std::cout << "Read buffer size: " << max_buffer_size << " bytes" << std::endl;
 
         // For each chunk, do:
         for ( int i = 1; i <= num_chunks; ++i ) {
@@ -109,18 +101,15 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             std::string out_file_name( out_file_path.str() );
             paths.push_back( out_file_name );
 
-            // Open output file
-            std::ofstream out_file;
-            out_file.open( out_file_name, std::ios_base::binary | std::ios::out );
-
-            if ( out_file.is_open() && file.good() ) {
-                out_file.seekp( 0, std::ios_base::beg );
+            FILE* outfile = nullptr;
+            outfile = fopen( out_file_name.c_str(), "wb" );
+            if ( outfile && file.good() ) {
 
                 // Ensure that calling read won't put us past the current chunk length by checking
                 // next_byte_position vs last_chunk_byte
                 while ( next_byte_position < last_chunk_byte && last_bytes_read < last_chunk_byte ) {
                     file.read( buffer, max_buffer_size );
-                    out_file.write( buffer, sizeof( buffer ) );
+                    fwrite( buffer, sizeof( buffer ), 1, outfile );
                     memset( &buffer, 0, sizeof( buffer ) );
                     last_bytes_read = file.tellg();
                     next_byte_position += max_buffer_size;
@@ -131,20 +120,18 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
                 if ( last_chunk_byte - last_bytes_read > 0 ) {
                     last_bytes_read = file.tellg();
                     long long int temp_buffer_size = last_chunk_byte - last_bytes_read;
-                    std::cout << "temp_buffer_size: " << temp_buffer_size << std::endl;
                     char temp_buffer[ temp_buffer_size ];
                     file.read( temp_buffer, sizeof( temp_buffer ) );
-                    out_file.write( temp_buffer, sizeof( temp_buffer ) );
+                    fwrite( temp_buffer, sizeof( temp_buffer ), 1, outfile );
                     last_bytes_read = file.tellg();
                 }
 
                 // Increment next_byte_position by max_buffer_size for the next_byte_position iteration
                 next_byte_position += max_buffer_size;
             }
-            out_file.close();
+            fclose( outfile );
+            auto end = std::chrono::high_resolution_clock::now();
         }
-
-        if (last_bytes_read == file_size) std::cout << "Chunked all bytes successfully!" << std::endl;
 
         return paths;
     } else {
@@ -182,8 +169,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	std::vector<std::string> paths = create_file_chunks( chunks, file_path );
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
-    std::cout << "               " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << '\n';
 	std::string new_name = clone_name( file_path );
     create_file_from_chunks( paths, new_name );
 
