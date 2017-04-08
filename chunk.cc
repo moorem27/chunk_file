@@ -131,6 +131,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
                 if ( last_chunk_byte - last_bytes_read > 0 ) {
                     last_bytes_read = file.tellg();
                     long long int temp_buffer_size = last_chunk_byte - last_bytes_read;
+                    std::cout << "temp_buffer_size: " << temp_buffer_size << std::endl;
                     char temp_buffer[ temp_buffer_size ];
                     file.read( temp_buffer, sizeof( temp_buffer ) );
                     out_file.write( temp_buffer, sizeof( temp_buffer ) );
@@ -157,6 +158,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
  * @param out_path - The path where the assembled file will be created
  */
 void create_file_from_chunks( const std::vector<std::string> &paths, const std::string& out_path ) {
+    auto begin = std::chrono::high_resolution_clock::now();
 	std::ofstream output( out_path, std::ios_base::binary | std::ios::out );
 
 	for( const auto& path : paths ) {
@@ -164,6 +166,9 @@ void create_file_from_chunks( const std::vector<std::string> &paths, const std::
 		output << file.rdbuf();
 	}
     output.close();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Reassembly took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
+    std::cout << "                 " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
 }
 
 /**
