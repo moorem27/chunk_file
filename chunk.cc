@@ -8,19 +8,20 @@
 // TODO Move all helper functions into a library file
 // TODO Do more error checking all around
 namespace {
-	const int max_buffer_size = 50000;
+    // Adjust this for performance as needed
+	const int max_buffer_size = 4096;
 	char buffer[ max_buffer_size ];
 }
 
 
-std::string get_extension( const std::string file_path ) {
+std::string get_extension( const std::string& file_path ) {
 	size_t last_index = file_path.find_last_of( "." );
 	std::string extension = file_path.substr( last_index, file_path.length() );
 	return extension;
 }
 
 
-std::string remove_extension( const std::string file_path ) {
+std::string remove_extension( const std::string& file_path ) {
 	size_t dot = file_path.find_last_of( "." );
 	if ( dot == std::string::npos ) return file_path;
 	return file_path.substr( 0, dot );
@@ -32,7 +33,7 @@ std::string clone_name( const std::string& file_path ) {
 }
 
 
-void erase_chunks( const std::vector<std::string> paths ) {
+void erase_chunks( const std::vector<std::string>& paths ) {
     for( const auto& path : paths ) {
         std::remove( path.c_str() );
     }
@@ -40,7 +41,7 @@ void erase_chunks( const std::vector<std::string> paths ) {
 
 
 // TODO Refactor this monstrosity some day
-std::vector<std::string> create_file_chunks( const int chunks, const std::string file_path ) {
+std::vector<std::string> create_file_chunks( const int chunks, const std::string& file_path ) {
     if( !file_path.empty() && chunks > 0 ) {
         std::ifstream file;
         std::vector<std::string> paths{};
@@ -90,7 +91,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
             std::ofstream out_file;
             out_file.open( out_file_name, std::ios_base::binary | std::ios::out );
 
-            if ( out_file.is_open() ) {
+            if ( out_file.is_open() && file.good() ) {
                 out_file.seekp( 0, std::ios_base::beg );
 
                 // Ensure that calling read won't put us past the current chunk length by checking next vs current_end
@@ -131,7 +132,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
 }
 
 
-void create_file_from_chunks( const std::vector<std::string> &paths, const std::string out_path ) {
+void create_file_from_chunks( const std::vector<std::string> &paths, const std::string& out_path ) {
 	std::ofstream output( out_path, std::ios_base::binary | std::ios::out );
 
 	for( const auto& path : paths ) {
@@ -151,13 +152,14 @@ int test_chunks( const std::string& file_path, const int chunks ) {
     // erase_chunks( paths );
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Chunking took: " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
+    std::cout << "Chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
+    std::cout << "               " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
 	return 0;
 }
 
 
 int main( void ) {
-	test_chunks( "/path/to/chunk/sample.txt", 10 );
+	test_chunks( "/Users/matthewmoore/Desktop/silicon_valley.mov", 4 );
     return 0;
 }
 
