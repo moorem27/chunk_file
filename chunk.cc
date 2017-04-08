@@ -114,6 +114,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
                     last_bytes_read = file.tellg();
                     next_byte_position += max_buffer_size;
                 }
+
                 memset( &buffer, 0, sizeof( buffer ) );
 
                 // If there are still bytes to be read:
@@ -132,7 +133,6 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             fclose( outfile );
             auto end = std::chrono::high_resolution_clock::now();
         }
-
         return paths;
     } else {
         return {};
@@ -144,7 +144,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
  * @param paths - The paths to the file chunks
  * @param out_path - The path where the assembled file will be created
  */
-void create_file_from_chunks( const std::vector<std::string> &paths, const std::string& out_path ) {
+void create_file_from_chunks( const std::vector<std::string>& paths, const std::string& out_path ) {
     auto begin = std::chrono::high_resolution_clock::now();
 	std::ofstream output( out_path, std::ios_base::binary | std::ios::out );
 
@@ -183,9 +183,10 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  * Good ol' fashioned main
  * @return 0
  */
-int main( void ) {
+int main( int argc, char* argv[] ) {
+    std::string path = argv[1];
     // Adjust file path and number of chunks
-	test_chunks( "/Users/matthewmoore/Desktop/silicon_valley.mov" , 4 );
+	test_chunks( path, 4 );
     return 0;
 }
 
