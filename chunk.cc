@@ -6,7 +6,6 @@
 #include <chrono>
 
 
-// TODO Move all helper functions into a library file
 // TODO Do more error checking all around
 namespace {
     // Adjust this for performance as needed
@@ -58,15 +57,14 @@ void erase_chunks( const std::vector<std::string>& paths ) {
 }
 
 
-// TODO Refactor this monstrosity some day (it needs a lot of work...or does it?)
 /**
  * This function splits a file into separate chunks
- * @param chunks - The number of chunks to split the file specified by file_path
+ * @param num_chunks - The number of chunks to split the file specified by file_path
  * @param file_path - The file path to the file
  * @return A vector of strings containing the file paths to the newly created chunks
  */
-std::vector<std::string> create_file_chunks( const int chunks, const std::string& file_path ) {
-    if( !file_path.empty() && chunks > 0 ) {
+std::vector<std::string> create_file_chunks( const int num_chunks, const std::string& file_path ) {
+    if( !file_path.empty() && num_chunks > 0 ) {
         std::ifstream file;
         std::vector<std::string> paths{};
         std::string extension = get_extension( file_path );
@@ -79,14 +77,14 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
         file.seekg( 0, std::ifstream::end );
 
         // Grab total file size
-        long long int size = file.tellg();
-        std::cout << "Total file size: " << size << std::endl;
+        long long int file_size = file.tellg();
+        std::cout << "Total file size: " << file_size << " bytes" << std::endl;
 
         // Seek back to beginning;
         file.seekg( 0, std::ifstream::beg );
 
         // Calculate chunk size
-        long long int chunk_size = size / chunks;
+        long long int chunk_size = file_size / num_chunks;
 
         // The last amount of bytes read
         long long int last_bytes_read = 0;
@@ -94,16 +92,16 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
         // Next byte position if a read were to occur
         long long int next_byte_position = max_buffer_size;
 
-        std::cout << "Number of chunks: " << chunks << std::endl;
-        std::cout << "Individual chunk size: " << chunk_size << std::endl;
-        std::cout << "Read buffer size: " << max_buffer_size << std::endl;
+        std::cout << "Number of chunks: " << num_chunks << std::endl;
+        std::cout << "Individual chunk size: " << chunk_size << " bytes" << std::endl;
+        std::cout << "Read buffer size: " << max_buffer_size << " bytes" << std::endl;
 
         // For each chunk, do:
-        for ( int i = 1; i <= chunks; ++i ) {
+        for ( int i = 1; i <= num_chunks; ++i ) {
             memset( &buffer, 0, sizeof( buffer ) );
 
             // Calculate the ending byte of the current chunk
-            long long int last_chunk_byte = ( ( i * size ) / chunks );
+            long long int last_chunk_byte = ( ( i * file_size ) / num_chunks );
 
             // Create chunk file name and push to the vector of chunk names
             std::ostringstream out_file_path;
@@ -132,12 +130,11 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
                 // If there are still bytes to be read:
                 if ( last_chunk_byte - last_bytes_read > 0 ) {
                     last_bytes_read = file.tellg();
-                    // Read them in one character at a time until current chunk length TODO: Make this great again?
-                    while ( last_bytes_read != last_chunk_byte ) {
-                        file.read( buffer, sizeof( char ) );
-                        out_file.write( buffer, sizeof( char ) );
-                        last_bytes_read = file.tellg();
-                    }
+                    long long int temp_buffer_size = last_chunk_byte - last_bytes_read;
+                    char temp_buffer[ temp_buffer_size ];
+                    file.read( temp_buffer, sizeof( temp_buffer ) );
+                    out_file.write( temp_buffer, sizeof( temp_buffer ) );
+                    last_bytes_read = file.tellg();
                 }
 
                 // Increment next_byte_position by max_buffer_size for the next_byte_position iteration
@@ -146,7 +143,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
             out_file.close();
         }
 
-        if (last_bytes_read == size) std::cout << "Chunked all bytes successfully!" << std::endl;
+        if (last_bytes_read == file_size) std::cout << "Chunked all bytes successfully!" << std::endl;
 
         return paths;
     } else {
@@ -197,7 +194,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  */
 int main( void ) {
     // Adjust file path and number of chunks
-	test_chunks( "/home/matt/Desktop/arma.mp4" , 4 );
+	test_chunks( "/home/matt/Desktop/network.pdf" , 4 );
     return 0;
 }
 
