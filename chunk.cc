@@ -146,6 +146,8 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             }
             fclose( outfile );
         }
+        if( last_bytes_read == file_size )
+            std::cout << "Successfully split " << file_size << " bytes into " << num_chunks << " chunks" << std::endl;
         return paths;
     } else {
         return {};
