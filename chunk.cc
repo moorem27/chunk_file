@@ -61,7 +61,7 @@ void erase_chunks( const std::vector<std::string>& paths ) {
  * This function splits a file into separate chunks
  * @param num_chunks - The number of chunks to split the file specified by file_path
  * @param file_path - The file path to the file
- * @return A vector of file paths (std::strings) to the newly created chunks
+ * @return A vector of strings containing the file paths to the newly created chunks
  */
 std::vector<std::string> create_file_chunks( const int num_chunks, const std::string& file_path ) {
     if( !file_path.empty() && num_chunks > 0 ) {
