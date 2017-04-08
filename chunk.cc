@@ -65,7 +65,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
         long long int chunk_size = size / chunks;
 
         // The last amount of bytes read
-        long long int last = 0;
+        long long int last_bytes_read = 0;
 
         // Next byte position if a read were to occur
         long long int next_byte_position = max_buffer_size;
@@ -79,7 +79,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
             memset( &buffer, 0, sizeof( buffer ) );
 
             // Calculate the ending byte of the current chunk
-            long long int current_end = ( ( i * size ) / chunks );
+            long long int last_chunk_byte = ( ( i * size ) / chunks );
 
             // Create chunk file name and push to the vector of chunk names
             std::ostringstream out_file_path;
@@ -95,24 +95,24 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
                 out_file.seekp( 0, std::ios_base::beg );
 
                 // Ensure that calling read won't put us past the current chunk length by checking
-                // next_byte_position vs current_end
-                while ( next_byte_position < current_end && last < current_end ) {
+                // next_byte_position vs last_chunk_byte
+                while ( next_byte_position < last_chunk_byte && last_bytes_read < last_chunk_byte ) {
                     file.read( buffer, max_buffer_size );
                     out_file.write( buffer, sizeof( buffer ) );
                     memset( &buffer, 0, sizeof( buffer ) );
-                    last = file.tellg();
+                    last_bytes_read = file.tellg();
                     next_byte_position += max_buffer_size;
                 }
                 memset( &buffer, 0, sizeof( buffer ) );
 
                 // If there are still bytes to be read:
-                if ( current_end - last > 0 ) {
-                    last = file.tellg();
+                if ( last_chunk_byte - last_bytes_read > 0 ) {
+                    last_bytes_read = file.tellg();
                     // Read them in one character at a time until current chunk length TODO: Make this great again?
-                    while ( last != current_end ) {
+                    while ( last_bytes_read != last_chunk_byte ) {
                         file.read( buffer, sizeof( char ) );
                         out_file.write( buffer, sizeof( char ) );
-                        last = file.tellg();
+                        last_bytes_read = file.tellg();
                     }
                 }
 
@@ -122,7 +122,7 @@ std::vector<std::string> create_file_chunks( const int chunks, const std::string
             out_file.close();
         }
 
-        if (last == size) std::cout << "Chunked all bytes successfully!" << std::endl;
+        if (last_bytes_read == size) std::cout << "Chunked all bytes successfully!" << std::endl;
 
         return paths;
     } else {
