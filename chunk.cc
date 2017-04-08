@@ -176,15 +176,15 @@ void create_file_from_chunks( const std::vector<std::string> &paths, const std::
 int test_chunks( const std::string& file_path, const int chunks ) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	std::vector<std::string> paths = create_file_chunks( chunks, file_path );
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
+    std::cout << "               " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
 	std::string new_name = clone_name( file_path );
     create_file_from_chunks( paths, new_name );
 
     // Comment this in to erase chunks
     // erase_chunks( paths );
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << std::endl;
-    std::cout << "               " << std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count() << " s" << std::endl;
 	return 0;
 }
 
@@ -194,7 +194,7 @@ int test_chunks( const std::string& file_path, const int chunks ) {
  */
 int main( void ) {
     // Adjust file path and number of chunks
-	test_chunks( "/home/matt/Desktop/network.pdf" , 4 );
+	test_chunks( "/Users/matthewmoore/Desktop/silicon_valley.mov" , 4 );
     return 0;
 }
 
