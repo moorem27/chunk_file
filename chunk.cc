@@ -97,7 +97,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
         file.seekg( 0, std::ifstream::beg );
 
         // The last amount of bytes read
-        long long int last_bytes_read = 0;
+        long long int last_byte_read = 0;
 
         // Next byte position if a read were to occur
         long long int next_byte_position = max_buffer_size;
@@ -121,34 +121,40 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
                 paths.push_back( out_file_name );
                 // Ensure that calling read won't put us past the current chunk length by checking
                 // next_byte_position vs last_chunk_byte
-                while ( next_byte_position < current_chunk_last_byte && last_bytes_read < current_chunk_last_byte ) {
+                while ( next_byte_position < current_chunk_last_byte && last_byte_read < current_chunk_last_byte ) {
                     file.read( buffer, max_buffer_size );
                     fwrite( buffer, sizeof( buffer ), 1, outfile );
                     memset( &buffer, 0, sizeof( buffer ) );
-                    last_bytes_read = file.tellg();
+                    last_byte_read = file.tellg();
                     next_byte_position += max_buffer_size;
                 }
 
                 memset( &buffer, 0, sizeof( buffer ) );
 
                 // If there are still bytes to be read:
-                if ( current_chunk_last_byte - last_bytes_read > 0 ) {
-                    last_bytes_read = file.tellg();
-                    long long int temp_buffer_size = current_chunk_last_byte - last_bytes_read;
+                if ( current_chunk_last_byte - last_byte_read > 0 ) {
+                    last_byte_read = file.tellg();
+                    long long int temp_buffer_size = current_chunk_last_byte - last_byte_read;
                     char temp_buffer[ temp_buffer_size ];
                     file.read( temp_buffer, sizeof( temp_buffer ) );
                     fwrite( temp_buffer, sizeof( temp_buffer ), 1, outfile );
-                    last_bytes_read = file.tellg();
+                    last_byte_read = file.tellg();
                 }
 
                 // Increment next_byte_position by max_buffer_size for the next_byte_position iteration
                 next_byte_position += max_buffer_size;
+            } else {
+                std::cout << "Bad input or output file" << std::endl;
+                return {};
             }
             fclose( outfile );
         }
-        if( last_bytes_read == file_size )
+        if( last_byte_read == file_size ) {
             std::cout << "Successfully split " << file_size << " bytes into " << num_chunks << " chunks" << std::endl;
-        return paths;
+            return paths;
+        } else {
+            return {};
+        }
     } else {
         return {};
     }
@@ -204,14 +210,18 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 	return -1;
 }
 
+
 /**
- * Good ol' fashioned main
- * @return 0
+ *
+ * @param argc
+ * @param argv
+ * @return
  */
 int main( int argc, char* argv[] ) {
     std::string path = argv[ 1 ];
     const unsigned int chunks = static_cast<unsigned int>( atoi( argv[ 2 ] ) );
-
+    std::cout << "Path: " << std::endl;
+    std::cout << path << std::endl;
 	test_chunks( path, chunks );
 
     return 0;
