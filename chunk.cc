@@ -9,8 +9,8 @@
 // TODO Do more error checking all around
 namespace {
     // Adjust this for performance as needed
-	const int max_buffer_size = 4096;
-	char buffer[ max_buffer_size ];
+	const int MAX_BUFFER_SIZE = 4096;
+	char buffer[ MAX_BUFFER_SIZE ];
 }
 
 /**
@@ -91,16 +91,13 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
         file.seekg( 0, std::ifstream::end );
 
         // Grab total file size
-        long long int file_size = file.tellg();
+        const long long int file_size = file.tellg();
 
         // Seek back to beginning;
         file.seekg( 0, std::ifstream::beg );
 
         // The last amount of bytes read
         long long int last_byte_read = 0;
-
-        // Next byte position if a read were to occur
-        long long int next_byte_position = max_buffer_size;
 
         // For each chunk, do:
         for ( int i = 1; i <= num_chunks; ++i ) {
@@ -117,32 +114,19 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             FILE* outfile = nullptr;
             outfile = fopen( out_file_name.c_str(), "wb" );
             if ( outfile && file.good() ) {
-                // Output file creation successful, so store name in vector
                 paths.push_back( out_file_name );
-                // Ensure that calling read won't put us past the current chunk length by checking
-                // next_byte_position vs last_chunk_byte
-                while ( next_byte_position < current_chunk_last_byte && last_byte_read < current_chunk_last_byte ) {
-                    file.read( buffer, max_buffer_size );
-                    fwrite( buffer, sizeof( buffer ), 1, outfile );
-                    memset( &buffer, 0, sizeof( buffer ) );
-                    last_byte_read = file.tellg();
-                    next_byte_position += max_buffer_size;
+                while( last_byte_read < current_chunk_last_byte && current_chunk_last_byte <= file_size ) {
+                    long long int bytes = 0;
+                    if( last_byte_read + MAX_BUFFER_SIZE <= current_chunk_last_byte ) {
+                        bytes = MAX_BUFFER_SIZE;
+                    } else if( last_byte_read + MAX_BUFFER_SIZE > current_chunk_last_byte ) {
+                        bytes = current_chunk_last_byte - last_byte_read;
+                    }
+                    file.read( buffer, bytes );
+                    fwrite( buffer, static_cast<size_t>( bytes ), 1, outfile );
+                    memset( &buffer, 0, static_cast<size_t>( bytes ) );
+                    last_byte_read += bytes;
                 }
-
-                memset( &buffer, 0, sizeof( buffer ) );
-
-                // If there are still bytes to be read:
-                if ( current_chunk_last_byte - last_byte_read > 0 ) {
-                    last_byte_read = file.tellg();
-                    long long int temp_buffer_size = current_chunk_last_byte - last_byte_read;
-                    char temp_buffer[ temp_buffer_size ];
-                    file.read( temp_buffer, sizeof( temp_buffer ) );
-                    fwrite( temp_buffer, sizeof( temp_buffer ), 1, outfile );
-                    last_byte_read = file.tellg();
-                }
-
-                // Increment next_byte_position by max_buffer_size for the next_byte_position iteration
-                next_byte_position += max_buffer_size;
             } else {
                 std::cout << "Bad input or output file" << std::endl;
                 return {};
