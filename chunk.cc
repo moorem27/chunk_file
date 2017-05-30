@@ -104,7 +104,7 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
             memset( &buffer, 0, sizeof( buffer ) );
 
             // Calculate the ending byte of the current chunk
-            long long int current_chunk_last_byte = ( ( i / num_chunks ) * file_size );
+            long long int current_chunk_last_byte = ( ( i * file_size ) / num_chunks );
 
             // Create chunk file name
             std::ostringstream out_file_path;
