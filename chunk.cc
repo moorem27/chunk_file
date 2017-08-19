@@ -12,7 +12,6 @@
 namespace {
     // Adjust this for performance as needed
 	const int MAX_BUFFER_SIZE = 4096;
-	char buffer[ MAX_BUFFER_SIZE ];
     int FILE_NUMBER = 1;
 }
 
@@ -97,7 +96,7 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
     std::ifstream file;
     const std::string extension = get_extension( file_path );
     const std::string file_name = remove_extension( file_path );
-
+	char buffer[ MAX_BUFFER_SIZE ];
     long long int last_byte_read = pair.first;
 
     // Open file
@@ -129,7 +128,6 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
 }
 
 
-// TODO: Figure out why files differ
 /**
  * This function splits a file into separate chunks. The file chunks are stored in the
  * same directory as the original file.
