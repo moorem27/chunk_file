@@ -206,8 +206,14 @@ int main( int argc, char* argv[] ) {
     const unsigned int chunks = static_cast<unsigned int>( atoi( argv[ 2 ] ) );
     std::cout << "Path: " << std::endl;
     std::cout << path << std::endl;
-	test_chunks( path, chunks );
+    
+    auto begin = std::chrono::high_resolution_clock::now();    
 
+    create_file_chunks( chunks, path );
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "File chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << '\n';
     return 0;
 }
 
