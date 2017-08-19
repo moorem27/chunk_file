@@ -129,6 +129,7 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
 }
 
 
+// TODO: Figure out why files differ
 /**
  * This function splits a file into separate chunks. The file chunks are stored in the
  * same directory as the original file.
