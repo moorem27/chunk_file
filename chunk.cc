@@ -124,6 +124,7 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
     }
     if( outfile )
         fclose( outfile );
+
     return out_file_name;
 }
 
@@ -205,10 +206,16 @@ void create_file_from_chunks( const std::vector<std::string>& paths, const std::
 int main( int argc, char* argv[] ) {
     std::string path = argv[ 1 ];
     const unsigned int chunks = static_cast<unsigned int>( atoi( argv[ 2 ] ) );
-    std::cout << "Path: " << std::endl;
     std::cout << path << std::endl;
-        
+   
+    auto begin = std::chrono::high_resolution_clock::now();
+     
     create_file_chunks( chunks, path );
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "File chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count()
+              << " ms" << std::endl;
+    
     return 0;
 }
 
