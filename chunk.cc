@@ -59,19 +59,6 @@ std::string clone_name( const std::string& file_path ) {
         return "";
 }
 
-/**
- * Iterate over a vector of strings that contain file paths and remove all files
- * @param paths - A vector of strings representing file paths
- */
-void erase_chunks( const std::vector<std::string>& paths ) {
-    if( !paths.empty() ) {
-        for ( const auto &path : paths ) {
-            std::remove( path.c_str() );
-        }
-    }
-}
-
-
 std::vector<std::pair<long long int, long long int>> create_chunk_pairs( const int num_chunks, const long long int file_size ) {
     std::vector<std::pair<long long int, long long int>> chunk_pairs{};
 
@@ -93,7 +80,7 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
                                const std::string file_path,
                                const long long int file_size,
                                const int file_number  ) {
-    std::ifstream file;
+    std::ifstream file{};
     const std::string extension = get_extension( file_path );
     const std::string file_name = remove_extension( file_path );
 	char buffer[ MAX_BUFFER_SIZE ];
@@ -124,7 +111,8 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
     }
     if( outfile )
         fclose( outfile );
-
+    
+    file.close();
     return out_file_name;
 }
 
@@ -138,7 +126,7 @@ std::string create_file_chunk( std::pair<long long int, long long int> pair,
  */
 void create_file_chunks( const int num_chunks, const std::string& file_path ) {
     if( !file_path.empty() && num_chunks > 0 ) {
-        std::ifstream file;
+        std::ifstream file{};
         std::vector<std::string> paths{};
         std::vector<std::thread> threads{};
 
@@ -161,6 +149,8 @@ void create_file_chunks( const int num_chunks, const std::string& file_path ) {
         long long int last_byte_read = 0;
 
         auto pairs = create_chunk_pairs( num_chunks, file_size );
+        
+        file.close();
 
         for( const auto& pair : pairs ) {
             threads.emplace_back( std::thread( create_file_chunk, pair, file_path, file_size, FILE_NUMBER ) );
