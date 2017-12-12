@@ -6,9 +6,7 @@
 #include <chrono>
 #include <stdio.h>
 
-// TODO Do more error checking all around
 namespace {
-    // Adjust this for performance as needed
     const int MAX_BUFFER_SIZE = 4096;
     char buffer[ MAX_BUFFER_SIZE ];
 }
@@ -52,7 +50,7 @@ std::string remove_extension( const std::string& file_path ) {
  */
 std::string clone_name( const std::string& file_path ) {
     if( !file_path.empty() )
-	    return remove_extension( file_path ) + "_clone" + get_extension( file_path );
+        return remove_extension( file_path ) + "_clone" + get_extension( file_path );
     else
         return "";
 }
@@ -71,6 +69,7 @@ void erase_chunks( const std::vector<std::string>& paths ) {
 
 
 /**
+ * TODO: This monstrosity needs a cleaning
  * This function splits a file into separate chunks. The file chunks are stored in the
  * same directory as the original file.
  * @param num_chunks - The number of chunks to split the file specified by file_path
@@ -92,6 +91,11 @@ std::vector<std::string> create_file_chunks( const int num_chunks, const std::st
 
         // Grab total file size
         const long long int file_size = file.tellg();
+        
+        if( num_chunks > file_size ) {
+            std::cout << "Sorry, the number of chunks cannot be greater than the file size" << std::endl;
+            return {};
+        }
 
         // Seek back to beginning;
         file.seekg( 0, std::ifstream::beg );
@@ -193,10 +197,12 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 
 
 /**
- *
- * @param argc
- * @param argv
- * @return
+ * Usage:
+ * ./chunk file 4
+ * @param argc the argument count
+ * @param argv[1] is /path/to/file
+ * @param argv[2] is the number of chunks to split file into 
+ * @return 0 if successful
  */
 int main( int argc, char* argv[] ) {
     std::string path = argv[ 1 ];
