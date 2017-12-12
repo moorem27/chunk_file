@@ -9,8 +9,8 @@
 // TODO Do more error checking all around
 namespace {
     // Adjust this for performance as needed
-	const int MAX_BUFFER_SIZE = 4096;
-	char buffer[ MAX_BUFFER_SIZE ];
+    const int MAX_BUFFER_SIZE = 4096;
+    char buffer[ MAX_BUFFER_SIZE ];
 }
 
 /**
@@ -188,10 +188,7 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
         return 0;
     }
 
-    // Comment this in to erase chunks
-    // erase_chunks( paths );
-
-	return -1;
+    return -1;
 }
 
 
@@ -204,16 +201,16 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 int main( int argc, char* argv[] ) {
     std::string path = argv[ 1 ];
     const unsigned int chunks = static_cast<unsigned int>( atoi( argv[ 2 ] ) );
+
     std::cout << "Path: " << std::endl;
     std::cout << path << std::endl;
     
     auto begin = std::chrono::high_resolution_clock::now();    
-
     create_file_chunks( chunks, path );
-
     auto end = std::chrono::high_resolution_clock::now();
 
     std::cout << "File chunking took: " << std::chrono::duration_cast<std::chrono::milliseconds>( end - begin ).count() << " ms" << '\n';
+
     return 0;
 }
 
