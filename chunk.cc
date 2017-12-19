@@ -1,10 +1,9 @@
-#include <string.h>
+#include <cstring>
 #include <vector>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <chrono>
-#include <stdio.h>
 
 namespace {
     const int MAX_BUFFER_SIZE = 4096;
@@ -19,7 +18,7 @@ namespace {
  */
 std::string get_extension( const std::string& file_path ) {
     if( !file_path.empty() ) {
-        size_t last_index = file_path.find_last_of( "." );
+        size_t last_index = file_path.find_last_of( '.' );
         std::string extension = file_path.substr( last_index, file_path.length() );
         return extension;
     } else {
@@ -35,7 +34,7 @@ std::string get_extension( const std::string& file_path ) {
  */
 std::string remove_extension( const std::string& file_path ) {
     if( !file_path.empty() ) {
-        size_t dot = file_path.find_last_of( "." );
+        size_t dot = file_path.find_last_of( '.' );
         if ( dot == std::string::npos ) return file_path;
         return file_path.substr( 0, dot );
     } else {
@@ -76,9 +75,9 @@ void erase_chunks( const std::vector<std::string>& paths ) {
  * @param file_path - The file path to the file
  * @return A vector of strings containing the file paths to the newly created chunks
  */
-std::vector<std::string> create_file_chunks( const int num_chunks, const std::string& file_path ) {
+std::vector<std::string> create_file_chunks( const long num_chunks, const std::string& file_path ) {
     if( !file_path.empty() && num_chunks > 0 ) {
-        std::ifstream file;
+        std::ifstream file{};
         std::vector<std::string> paths{};
         const std::string extension = get_extension( file_path );
         const std::string file_name = remove_extension( file_path );
@@ -196,6 +195,8 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
 }
 
 
+// TODO Handle files that have no '.'
+
 /**
  * Usage:
  * ./chunk file 4
@@ -205,13 +206,16 @@ int test_chunks( const std::string& file_path, const unsigned int chunks ) {
  * @return 0 if successful
  */
 int main( int argc, char* argv[] ) {
+    constexpr int base = 10;
+    char* end_pointer = nullptr;
     std::string path = argv[ 1 ];
-    const unsigned int chunks = static_cast<unsigned int>( atoi( argv[ 2 ] ) );
+
+    auto chunks = strtol( argv[ 2 ], &end_pointer, base );
 
     std::cout << "Path: " << std::endl;
     std::cout << path << std::endl;
-    
-    auto begin = std::chrono::high_resolution_clock::now();    
+
+    auto begin = std::chrono::high_resolution_clock::now();
     create_file_chunks( chunks, path );
     auto end = std::chrono::high_resolution_clock::now();
 
